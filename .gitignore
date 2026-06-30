@@ -1,0 +1,10 @@
+# Local loop artifacts (these belong in the project a loop runs on, not here)
+SPEC.md
+STATE.md
+run-log.md
+
+# OS / editor cruft
+.DS_Store
+*.swp
+.idea/
+.vscode/
