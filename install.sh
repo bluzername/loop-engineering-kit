@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
-#
-# install.sh — deploy the Loop-Engineering Kit into ~/.claude
+# install.sh - deploy the Loop-Engineering Kit into a Claude Code config directory
 #
 # Usage:
-#   bash loop-engineering-kit/install.sh [--dry-run] [--copy] [--target DIR]
+#   bash install.sh [--dry-run] [--copy] [--target DIR]
 #
 #   --dry-run     Print what would happen; change nothing.
 #   --copy        Copy files instead of symlinking (detached from git).
 #   --target DIR  Install into DIR instead of ~/.claude.
 #
-# Idempotent: re-running re-points symlinks / refreshes copies. Existing
-# unrelated files in ~/.claude are never touched.
+# Idempotent: re-running re-points symlinks or refreshes copies. Existing
+# unrelated files in the target are never touched.
 set -euo pipefail
 
 DRY_RUN=0
@@ -22,39 +21,50 @@ while [[ $# -gt 0 ]]; do
     --dry-run) DRY_RUN=1 ;;
     --copy)    COPY=1 ;;
     --target)  TARGET="${2:?--target needs a directory}"; shift ;;
-    -h|--help) grep '^#' "$0" | sed 's/^#//'; exit 0 ;;
+    -h|--help) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "Unknown arg: $1" >&2; exit 2 ;;
   esac
   shift
 done
 
-# Resolve the kit's own directory regardless of where it's invoked from.
+# Resolve the kit's own directory regardless of where it is invoked from.
 SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-say()  { printf '%s\n' "$*"; }
-run()  { if [[ $DRY_RUN -eq 1 ]]; then say "  [dry-run] $*"; else eval "$*"; fi; }
+say() { printf '%s\n' "$*"; }
 
-# Install one source subtree into the matching target subtree, file by file.
-# $1 = subdir under the kit (commands|agents|skills); $2 = subdir under TARGET
+# Run a command, or print it shell-quoted in dry-run mode. Arguments are passed
+# through untouched, so paths containing spaces or quotes are safe.
+run() {
+  if [[ $DRY_RUN -eq 1 ]]; then
+    printf '  [dry-run]'
+    printf ' %q' "$@"
+    printf '\n'
+  else
+    "$@"
+  fi
+}
+
+# Install one kit subtree (commands, agents or skills) into the same-named
+# subtree under TARGET, file by file, preserving relative structure.
 install_tree() {
-  local sub="$1" dst_sub="$2"
+  local sub="$1"
   local src_dir="${SRC}/${sub}"
-  local dst_dir="${TARGET}/${dst_sub}"
+  local dst_dir="${TARGET}/${sub}"
   [[ -d "$src_dir" ]] || { say "  (skip ${sub}: not present)"; return; }
 
   say "==> ${sub} -> ${dst_dir}"
-  run "mkdir -p '${dst_dir}'"
+  run mkdir -p "$dst_dir"
 
-  # Walk every file under src_dir, recreating relative structure in dst_dir.
+  local f rel out
   while IFS= read -r -d '' f; do
-    local rel="${f#"${src_dir}/"}"
-    local out="${dst_dir}/${rel}"
-    run "mkdir -p '$(dirname "${out}")'"
+    rel="${f#"${src_dir}/"}"
+    out="${dst_dir}/${rel}"
+    run mkdir -p "$(dirname "$out")"
     if [[ $COPY -eq 1 ]]; then
-      run "cp -f '${f}' '${out}'"
+      run cp -f "$f" "$out"
     else
-      # -n: don't descend into a symlinked dir; -f: replace existing link/file
-      run "ln -sfn '${f}' '${out}'"
+      # -n: do not descend into a symlinked dir; -f: replace an existing link or file
+      run ln -sfn "$f" "$out"
     fi
     say "    ${rel}"
   done < <(find "$src_dir" -type f -print0)
@@ -66,13 +76,13 @@ say "  target: ${TARGET}"
 say "  mode:   $([[ $COPY -eq 1 ]] && echo copy || echo symlink)$([[ $DRY_RUN -eq 1 ]] && echo ' (dry-run)')"
 say ""
 
-install_tree "commands" "commands"
-install_tree "agents"   "agents"
-install_tree "skills"   "skills"
+install_tree commands
+install_tree agents
+install_tree skills
 
 say ""
 say "Done. Start a fresh Claude Code session and type '/' to see:"
-say "  /spec  /loop-run  /triage  /babysit  /loop-audit"
+say "  /spec  /loop-run  /triage  /babysit  /loop-audit  /loop-audit-all"
 say ""
-say "Templates and docs are reference material — read them from the kit:"
+say "Templates and docs are reference material; read them from the kit:"
 say "  ${SRC}/templates/  ${SRC}/docs/"
