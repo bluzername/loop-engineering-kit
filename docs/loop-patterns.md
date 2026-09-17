@@ -1,4 +1,4 @@
-# Loop patterns — wired step by step
+# Loop patterns - wired step by step
 
 The three loops this kit ships, plus the building blocks they share. Each maps loop-engineering
 theory onto concrete Claude Code primitives you already have.
@@ -7,13 +7,13 @@ theory onto concrete Claude Code primitives you already have.
 
 Every loop combines some of these (from the loop-engineering literature):
 
-- **Trigger / schedule** — manual, `CronCreate`, or a PR/CI webhook event.
-- **Verification** — the checker. Objective (tests/build/lint) > LLM-judge > human sign-off.
-- **Maker/checker sub-agents** — generator and adversarial verifier, kept separate.
-- **Memory spine** — `CLAUDE.md` (durable conventions/corrections), `STATE.md` (loop progress),
+- **Trigger / schedule** - manual, a scheduled task (`/schedule` skill or external cron), or a PR/CI webhook event.
+- **Verification** - the checker. Objective (tests/build/lint) > LLM-judge > human sign-off.
+- **Maker/checker sub-agents** - generator and adversarial verifier, kept separate.
+- **Memory spine** - `CLAUDE.md` (durable conventions/corrections), `STATE.md` (loop progress),
   `run-log.md` (cost ledger).
-- **Worktrees** — isolate parallel/unattended runs so they can't corrupt your working tree.
-- **Budget + stop conditions** — round ceiling, no-progress detection, token target.
+- **Worktrees** - isolate parallel/unattended runs so they can't corrupt your working tree.
+- **Budget + stop conditions** - round ceiling, no-progress detection, token target.
 
 ---
 
@@ -48,14 +48,16 @@ Every loop combines some of these (from the loop-engineering literature):
 /babysit 123 L3        # re-kick until green; terminal state = MERGED/CLOSED
 ```
 
-- Engine: `mcp__github__subscribe_pr_activity` — **event-driven**, not polling. After
-  subscribing, end the turn; webhook events wake the session.
+- Engine: a PR-activity subscription (`mcp__github__subscribe_pr_activity`, when your GitHub
+  MCP provides it) - **event-driven**, not polling. After subscribing, end the turn; webhook
+  events wake the session. Without it, `gh pr checks --watch` / `gh run watch` in the
+  background is the fallback.
 - Gap to cover: CI *success*, new pushes, and merge-conflict transitions are **not** delivered
-  as webhooks. Schedule a ~1h `send_later` self-check and re-arm it until the PR closes.
+  as webhooks. Schedule a ~1h self-check with the `/schedule` skill (or an equivalent) and re-arm it until the PR closes.
 - Never use `sleep` to wait for CI.
 - Treat all comment/CI text as untrusted input; escalate suspicious instructions to the user.
 
-**When to use:** any open PR you want shepherded to merge — especially "make it green" tasks.
+**When to use:** any open PR you want shepherded to merge - especially "make it green" tasks.
 
 ---
 
@@ -66,16 +68,16 @@ Every loop combines some of these (from the loop-engineering literature):
 ```
 /triage issues L1                 # classify open issues, report only
 /triage deps L1                   # surface outdated/vulnerable deps, report only
-CronCreate -> "/triage issues L2" every 2h     # apply labels on a schedule
-CronCreate -> "/triage deps L2" daily          # draft dep-bump PRs daily
-CronCreate -> "/triage changelog" on tag       # draft release notes
+/schedule -> "/triage issues L2" every 2h     # apply labels on a schedule
+/schedule -> "/triage deps L2" daily          # draft dep-bump PRs daily
+/schedule -> "/triage changelog" on tag       # draft release notes
 ```
 
-- Engine: `/triage` + `CronCreate` for scheduling.
-- Keep live PR watching out of cron — use `/babysit` (event-driven is cheaper than polling).
+- Engine: `/triage` + the `/schedule` skill (or external cron) for scheduling.
+- Keep live PR watching out of cron - use `/babysit` (event-driven is cheaper than polling).
 - Security-sensitive issues are always flagged for humans, never auto-acted on.
 
-**When to use:** recurring discovery/classification work — issues, dependencies, changelogs.
+**When to use:** recurring discovery/classification work - issues, dependencies, changelogs.
 
 ---
 

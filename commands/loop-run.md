@@ -1,15 +1,15 @@
 ---
-description: Spec-driven build loop — maker implements, checker verifies, iterate until acceptance criteria pass
+description: Spec-driven build loop - maker implements, checker verifies, iterate until acceptance criteria pass
 argument-hint: "[path to SPEC.md] [L1|L2|L3]"
 ---
 
-# /loop-run — the spec-driven build loop
+# /loop-run - the spec-driven build loop
 
 Run a **maker → checker → fix** loop against a spec until every acceptance criterion passes
 or the budget ceiling is hit. This is the loop-engineering core: you point it at a goal
 (`SPEC.md`) and it prompts itself.
 
-Arguments: **$ARGUMENTS** — optional path to the spec (default `SPEC.md`) and an optional
+Arguments: **$ARGUMENTS** - optional path to the spec (default `SPEC.md`) and an optional
 loop level (`L1`/`L2`/`L3`, default `L1`). Read the loop level from the argument, else from a
 `LOOP_LEVEL` env var, else default `L1`. See `docs/governance.md` for what each level permits.
 
@@ -17,7 +17,7 @@ loop level (`L1`/`L2`/`L3`, default `L1`). Read the loop level from the argument
 
 1. Load the spec. If it's missing, tell the user to run `/spec "<request>"` first and stop.
 2. Confirm the spec has a runnable **Verification command block**. If not, stop and ask the
-   user to make the criteria machine-checkable — a loop with no checker is not a loop.
+   user to make the criteria machine-checkable - a loop with no checker is not a loop.
 
 ## The loop
 
@@ -26,7 +26,7 @@ Repeat until all criteria pass OR you hit a stop condition:
 1. **Maker.** Launch the `maker` sub-agent (Agent tool, `subagent_type: "maker"`) with: the
    spec, the current failing criteria, and the checker's last report. It implements the
    smallest change that moves a failing criterion toward passing. It does NOT mark anything
-   done — only the checker does that.
+   done - only the checker does that.
 2. **Checker.** Launch the `checker` sub-agent (`subagent_type: "checker"`) with the spec's
    verification command block. It runs every criterion, reports per-criterion PASS/FAIL with
    evidence (command output), and adversarially tries to break "passing" criteria. Reuse the
@@ -48,7 +48,7 @@ Repeat until all criteria pass OR you hit a stop condition:
 ## By loop level
 
 - **L1 (report-only):** Run the full loop in a scratch/worktree but **do not commit or push**.
-  Report the final diff, which criteria pass, and what's left. This is the default — use it to
+  Report the final diff, which criteria pass, and what's left. This is the default - use it to
   validate that the spec is right before trusting the loop.
 - **L2 (assisted):** Apply changes to the working tree. When all criteria pass, **stop and ask**
   before committing/pushing.

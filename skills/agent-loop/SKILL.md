@@ -15,26 +15,26 @@ chain.
 
 ## Anatomy of a loop (define these before running)
 
-- **Goal** — the outcome, ideally a `SPEC.md` with machine-checkable criteria.
-- **Trigger** — what starts it (manual, a cron schedule, a PR/CI event).
-- **Scope** — files/areas the loop may touch.
-- **Action** — the generator step (the `maker` sub-agent, or `/spec` then implement).
-- **Check** — the verifier step. Always present. See hybrid verification below.
-- **Budget ceiling** — max rounds and/or token target. Hard stop.
-- **Stopping conditions** — all criteria pass; budget hit; no progress for N rounds.
-- **Reporting** — what the loop emits at the end and per round.
+- **Goal** - the outcome, ideally a `SPEC.md` with machine-checkable criteria.
+- **Trigger** - what starts it (manual, a cron schedule, a PR/CI event).
+- **Scope** - files/areas the loop may touch.
+- **Action** - the generator step (the `maker` sub-agent, or `/spec` then implement).
+- **Check** - the verifier step. Always present. See hybrid verification below.
+- **Budget ceiling** - max rounds and/or token target. Hard stop.
+- **Stopping conditions** - all criteria pass; budget hit; no progress for N rounds.
+- **Reporting** - what the loop emits at the end and per round.
 
 ## Hybrid verification (pick the cheapest sufficient check)
 
-1. **Objective** (preferred) — tests, build, lint, a runnable command with a pass/fail exit
+1. **Objective** (preferred) - tests, build, lint, a runnable command with a pass/fail exit
    code. Use the `checker` sub-agent and the `/verify` skill. Trust this over everything.
-2. **LLM-judge** — for criteria without a clean exit code (clarity of docs, API ergonomics),
+2. **LLM-judge** - for criteria without a clean exit code (clarity of docs, API ergonomics),
    spawn an independent agent to judge against an explicit rubric. Use a separate agent from
    the one that did the work, and default to skepticism.
-3. **Human sign-off** — for irreversible or high-stakes steps (publishing, prod, schema
+3. **Human sign-off** - for irreversible or high-stakes steps (publishing, prod, schema
    migrations), stop and require explicit approval regardless of loop level.
 
-A loop with no check is not a loop — refuse to run one until a check is defined.
+A loop with no check is not a loop - refuse to run one until a check is defined.
 
 ## Single loop (procedure)
 

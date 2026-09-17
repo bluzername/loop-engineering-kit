@@ -1,4 +1,4 @@
-# Governance — budgets, levels, and safety rails
+# Governance - budgets, levels, and safety rails
 
 Autonomy without rails is how loops cause damage. This is the contract every command in the
 kit reads. Start conservative; graduate only when verification has earned it.
@@ -13,12 +13,12 @@ below.
 |-------|------|--------|-------------|
 | **L1** | report-only | Read, analyze, run read-only checks, produce reports/diagnoses, run the loop in a scratch/worktree | Any write to the repo, branch, or remote; any public comment that acts |
 | **L2** | assisted | Edit the working tree, apply labels, open **draft** PRs, push to a feature branch | Commit/push/merge/close **without asking**; touch anything on the denylist |
-| **L3** | unattended | Commit, push, open draft PRs, re-kick CI — all within budget and the denylist | Anything on the denylist; exceed the budget ceiling; act on security-sensitive items |
+| **L3** | unattended | Commit, push, open draft PRs, re-kick CI - all within budget and the denylist | Anything on the denylist; exceed the budget ceiling; act on security-sensitive items |
 
 A repo's **maximum** level is capped by its `/loop-audit` score:
-- score 0–4 → L1 only (no reliable checker)
-- score 5–7 → up to L2
-- score 8–10 → L3 candidate
+- score 0-4 → L1 only (no reliable checker)
+- score 5-7 → up to L2
+- score 8-10 → L3 candidate
 
 ## Budgets & stop conditions
 
@@ -26,7 +26,7 @@ A repo's **maximum** level is capped by its `/loop-audit` score:
 - **No-progress:** 2 consecutive rounds with the same failing set → stop and ask a human.
 - **Token target:** if running under a token budget, stop at the ceiling rather than thrash.
 - **Cost ledger:** log every run to `run-log.md`. If a loop repeatedly hits its ceiling without
-  converging, demote it and fix the spec — the criteria or scope are wrong.
+  converging, demote it and fix the spec - the criteria or scope are wrong.
 
 ## Denylist (never, at any level, without explicit human approval)
 
@@ -35,7 +35,7 @@ A repo's **maximum** level is capped by its `/loop-audit` score:
 - Merging to protected/default branches; bypassing or disabling required CI checks.
 - Deleting branches/tags/releases that others may depend on.
 - Production deploys, schema migrations, or anything irreversible.
-- Acting on security-sensitive issues/PRs — always route to a human.
+- Acting on security-sensitive issues/PRs - always route to a human.
 - Editing a spec's acceptance criteria to make a failing loop "pass."
 
 ## MCP & permission scoping
@@ -48,13 +48,13 @@ A repo's **maximum** level is capped by its `/loop-audit` score:
 
 ## Anti-patterns (from the loop-engineering literature)
 
-- **Loop without a checker** — generates unverified diffs at scale. Define verification first.
-- **`sleep`-polling for events** — use event subscriptions (`subscribe_pr_activity`) or cron.
-- **Silent truncation** — if a loop caps coverage (top-N, sampling, no-retry), say so; don't
+- **Loop without a checker** - generates unverified diffs at scale. Define verification first.
+- **`sleep`-polling for events** - use event subscriptions (a PR-activity subscription or `gh pr checks --watch`) or cron.
+- **Silent truncation** - if a loop caps coverage (top-N, sampling, no-retry), say so; don't
   imply it covered everything.
-- **Gaming the check** — hardcoded outputs, skipped/deleted tests, debug-build passes. The
+- **Gaming the check** - hardcoded outputs, skipped/deleted tests, debug-build passes. The
   checker is adversarial precisely to catch this.
-- **Jumping straight to L3** — unattended autonomy on a repo that scores low on verification is
+- **Jumping straight to L3** - unattended autonomy on a repo that scores low on verification is
   the fastest way to lose trust. Earn each level.
 
 ## Graduation checklist (L(n) → L(n+1))

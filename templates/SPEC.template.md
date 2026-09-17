@@ -19,10 +19,10 @@
 
 Each criterion is a concrete, runnable check. Number them so the checker can report per-criterion.
 
-- **C1** — <e.g. the build/typecheck exits 0: `make build` / `npm run build` / `cargo build`>
-- **C2** — <e.g. `myapp --version` prints a semver string like `1.2.3`>
-- **C3** — <e.g. `pytest tests/test_x.py::test_y` passes>
-- **C4** — <e.g. file `X` contains string `Y` / no longer contains `Z`>
+- **C1** - <e.g. the build/typecheck exits 0: `make build` / `npm run build` / `cargo build`>
+- **C2** - <e.g. `myapp --version` prints a semver string like `1.2.3`>
+- **C3** - <e.g. `pytest tests/test_x.py::test_y` passes>
+- **C4** - <e.g. file `X` contains string `Y` / no longer contains `Z`>
 
 ## Verification command block
 
@@ -31,13 +31,13 @@ this unattended. It should exit non-zero if any criterion fails.
 
 ```bash
 set -e
-# C1 — build/typecheck
+# C1 - build/typecheck
 make build
-# C2 — CLI prints a semver version
+# C2 - CLI prints a semver version
 myapp --version | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+'
-# C3 — targeted test
+# C3 - targeted test
 # pytest tests/test_x.py::test_y
-# C4 — file content assertion
+# C4 - file content assertion
 # grep -q "Y" path/to/file
 echo "ALL CRITERIA PASSED"
 ```
