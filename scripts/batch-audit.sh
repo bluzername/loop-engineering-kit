@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# batch-audit.sh — rank a directory of projects by loop-readiness.
+# batch-audit.sh - rank a directory of projects by loop-readiness.
 #
 # Read-only. Scans each immediate subdirectory and scores 0-10 across the same
 # dimensions as the /loop-audit command, so you can pick the best project to test

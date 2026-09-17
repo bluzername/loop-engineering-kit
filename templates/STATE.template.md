@@ -1,7 +1,7 @@
-# STATE — <loop / project name>
+# STATE - <loop / project name>
 
 > The durable spine of a long-running loop. Update it every round so any fresh session (or a
-> resumed loop) can pick up exactly where the last one left off. This is external memory —
+> resumed loop) can pick up exactly where the last one left off. This is external memory  - 
 > don't rely on conversation context surviving.
 
 ## Goal
@@ -16,12 +16,12 @@
 
 ## Progress log (newest first)
 
-- <date> — round <n>: <what changed, what the checker found>
-- <date> — round <n-1>: ...
+- <date> - round <n>: <what changed, what the checker found>
+- <date> - round <n-1>: ...
 
 ## Decisions
 
-- <Key choices made and why — so they aren't re-litigated next round.>
+- <Key choices made and why - so they aren't re-litigated next round.>
 
 ## Blockers / open questions
 

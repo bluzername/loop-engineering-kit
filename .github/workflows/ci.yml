@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Shell lint
+        run: |
+          bash -n install.sh scripts/batch-audit.sh
+          shellcheck -S style install.sh scripts/batch-audit.sh
+
+      - name: Frontmatter on commands, agents and skills
+        run: |
+          set -e
+          for f in commands/*.md agents/*.md skills/*/SKILL.md; do
+            head -1 "$f" | grep -qx -- '---' || { echo "$f: missing frontmatter"; exit 1; }
+            grep -q '^description: ' "$f" || { echo "$f: missing description"; exit 1; }
+            case "$f" in
+              agents/*|skills/*) grep -q '^name: ' "$f" || { echo "$f: missing name"; exit 1; } ;;
+            esac
+            echo "ok $f"
+          done
+
+      - name: Install (dry-run, symlink, idempotent, copy)
+        run: |
+          set -e
+          T="$RUNNER_TEMP/claude-link"
+          bash install.sh --dry-run --target "$T"
+          test ! -e "$T"
+          bash install.sh --target "$T"
+          for f in commands/spec.md agents/maker.md skills/agent-loop/SKILL.md; do
+            test -L "$T/$f" && cmp "$f" "$T/$f"
+          done
+          bash install.sh --target "$T"
+          C="$RUNNER_TEMP/claude-copy"
+          bash install.sh --copy --target "$C"
+          test -f "$C/commands/spec.md" && test ! -L "$C/commands/spec.md"
+          cmp commands/spec.md "$C/commands/spec.md"
+          echo "install ok"
+
+      - name: Batch audit smoke test
+        run: |
+          set -e
+          P="$RUNNER_TEMP/projects"
+          mkdir -p "$P/ready/tests" "$P/ready/.github/workflows" "$P/empty"
+          echo '{"scripts":{"test":"node --test"}}' > "$P/ready/package.json"
+          touch "$P/ready/tests/a.test.js" "$P/ready/.github/workflows/ci.yml" "$P/ready/CLAUDE.md"
+          git init -q "$P/ready"
+          out="$(bash scripts/batch-audit.sh "$P")"
+          echo "$out"
+          grep -q '^ready ' <<<"$out"
+          grep -q '^empty ' <<<"$out"
+          grep -q 'Recommendation: ready' <<<"$out"
+
+      - name: No em or en dashes
+        run: |
+          if grep -rnP '[\x{2013}\x{2014}]' --include='*.md' --include='*.sh' --include='*.yml' . ; then
+            echo "dash characters found"; exit 1
+          fi
